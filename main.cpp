@@ -44,10 +44,24 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
         enemy.setPosition(x, y);
         enemy.setScale(0.45f, 0.45f);
 
-        while (enemy.getGlobalBounds().intersects(playerSprite.getGlobalBounds())) {
-            x = static_cast<float>(xrange(gen));
-            y = static_cast<float>(yrange(gen));
+        sf::Vector2u windowSize = window.getSize();
+
+        sf::FloatRect enemyBounds = enemy.getGlobalBounds();
+        sf::FloatRect playerBounds = playerSprite.getGlobalBounds();
+
+        auto isEnemyOutsideWindow = [&](const sf::FloatRect& bounds) {
+            return bounds.left < 0.f ||
+                bounds.top < 0.f ||
+                bounds.left + bounds.width > static_cast<float>(windowSize.x) ||
+                bounds.top + bounds.height > static_cast<float>(windowSize.y);
+            };
+
+        while (enemyBounds.intersects(playerBounds) || isEnemyOutsideWindow(enemyBounds)) {
+            float x = static_cast<float>(xrange(gen));
+            float y = static_cast<float>(yrange(gen));
             enemy.setPosition(x, y);
+
+            enemyBounds = enemy.getGlobalBounds();
         }
         enemies[i] = enemy;
     }
@@ -71,7 +85,9 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
     sf::Texture playerWithGunTexture;
     playerWithGunTexture.loadFromFile("assets/john_pork_with_gun.png");
 
-	std::vector<sf::CircleShape> bullets;    
+    sf::Texture bulletTexture;
+	bulletTexture.loadFromFile("assets/bullet.png");
+    std::vector<sf::Sprite> bullets;
     std::vector<float> angles;
 #pragma endregion
 
@@ -179,15 +195,17 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
             if (!gunshotBuffer.loadFromFile("assets/gunshot.ogg")) return -1;
             gunshotSound.setBuffer(gunshotBuffer);
             gunshotSound.play();
-            bullets.push_back(sf::CircleShape());
-            bullets.back().setFillColor(sf::Color::Red);
-            bullets.back().setRadius(15);
+			sf::Sprite bullet;
+            bullet.setTexture(bulletTexture);
+            bullets.push_back(bullet);
+            bullets.back().setScale(0.09f, 0.09f);
             bullets.back().setOrigin(5, 5);
             bullets.back().setPosition(playerSprite.getPosition());
 
 			float mouseX = sf::Mouse::getPosition(window).x;
 			float mouseY = sf::Mouse::getPosition(window).y;
 			float angle = std::atan2(mouseY - playerSprite.getPosition().y, mouseX - playerSprite.getPosition().x);
+            bullets.back().setRotation(angle * 180 / 3.14159f);
 			angles.push_back(angle);
 			bulletClock.restart();
 		}
