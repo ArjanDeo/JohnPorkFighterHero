@@ -2,14 +2,15 @@
 #include <SFML/Audio.hpp>
 #include <iostream>
 #include <windows.h>
-#include "player.h"
 #include <random>
 #include <string>
 #include <math.h>
 #include "enemy.h"
+#include "player.h"
+#include "button.h"
 
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow) {
-#pragma region Init
+#pragma region Window Init
     sf::SoundBuffer rifleBuffer;
     sf::Sound rifleSound;
 
@@ -22,11 +23,11 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
     sf::Image icon;
     if (!icon.loadFromFile("assets/john_pork_is_calling.jpg")) return -1;
     window.setIcon(icon.getSize().x, icon.getSize().y, icon.getPixelsPtr());
-
+#pragma endregion
     Player player("assets/john_pork.png", "John Pork", 100);
     sf::Sprite playerSprite = player.getSprite();
 
-#pragma region Sprites
+#pragma region Characters
 
     sf::Texture gunTexture;
     gunTexture.loadFromFile("assets/ak-47.png");
@@ -62,7 +63,8 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
             enemies[i].getGlobalBounds().intersects(gunBounds)
             );
     }
-
+#pragma endregion
+#pragma region Music + Font 
     sf::Texture background;
     background.loadFromFile("assets/background.jpg");
     sf::Sprite backgroundSprite(background);
@@ -71,17 +73,16 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
         static_cast<float>(window.getSize().y) / background.getSize().y
     );
 
-    
+
 
     bool hasGun = false;
     sf::Texture playerWithGunTexture;
     playerWithGunTexture.loadFromFile("assets/john_pork_with_gun.png");
 
     sf::Texture bulletTexture;
-	bulletTexture.loadFromFile("assets/bullet.png");
+    bulletTexture.loadFromFile("assets/bullet.png");
     std::vector<sf::Sprite> bullets;
     std::vector<float> angles;
-#pragma endregion
 
     sf::Font font;
     if (!font.loadFromFile("assets/porky.ttf")) return -1;
@@ -103,32 +104,66 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
     ringtone.play();
 
 #pragma endregion
+#pragma region Menu
+    sf::RectangleShape menuBackground;
+	menuBackground.setSize(sf::Vector2f(window.getSize()));
+	menuBackground.setFillColor(sf::Color(0, 0, 0, 150)); // Semi-transparent black
+    Button closeGameButton("Close Game");
+    closeGameButton.setPosition(50, 50);
+    bool menuState = false; 
 
+#pragma endregion
     sf::Clock deltaClock; 
     sf::Clock bulletClock;
     sf::Clock damageCooldownClocks[10];
     sf::Time damageCooldown = sf::seconds(1.f);
     float fireDelay = 0.2f;
+    if (!gunshotBuffer.loadFromFile("assets/gunshot.ogg")) return -1;
+    gunshotSound.setBuffer(gunshotBuffer);
     while (window.isOpen()) {
         float dt = deltaClock.restart().asSeconds();
 
         sf::Event event;
         while (window.pollEvent(event)) {
-            if (event.type == sf::Event::Closed || sf::Keyboard::isKeyPressed(sf::Keyboard::Escape))
+            if (event.type == sf::Event::Closed) {
                 window.close();
+            }
+            if (event.type == sf::Event::KeyPressed) {
+                if (event.key.code == sf::Keyboard::Escape) {
+                    menuState = !menuState;
+                }
+            }
         }
 
-        float speed = 500.f;
+        if (menuState) {
+            window.clear();
+            window.draw(menuBackground);
+            closeGameButton.draw(window);
 
+            window.display();
+
+            if (sf::Mouse::isButtonPressed(sf::Mouse::Left) &&
+                closeGameButton.buttonShape.getGlobalBounds().contains(
+                    static_cast<sf::Vector2f>(sf::Mouse::getPosition(window)))) {
+                window.close();
+            }
+
+
+            continue;
+        }
+
+        #pragma region Controls
+        float speed = 500.f;
         if (sf::Keyboard::isKeyPressed(sf::Keyboard::W)) playerSprite.move(0.f, -speed * dt);
         if (sf::Keyboard::isKeyPressed(sf::Keyboard::A)) playerSprite.move(-speed * dt, 0.f);
         if (sf::Keyboard::isKeyPressed(sf::Keyboard::S)) playerSprite.move(0.f, speed * dt);
-        if (sf::Keyboard::isKeyPressed(sf::Keyboard::D)) playerSprite.move(speed * dt, 0.f);
+        if (sf::Keyboard::isKeyPressed(sf::Keyboard::D)) playerSprite.move(speed * dt, 0.f);        
+        #pragma endregion
 
         healthText.setPosition(0.f, 60.f);
         healthText.setString("Health: " + std::to_string(player.getHealth()));
         healthText.setFillColor(player.getHealth() <= 50 ? sf::Color::Red : sf::Color::Green);
-
+        
         if (!hasGun && playerSprite.getGlobalBounds().intersects(gun.getGlobalBounds())) {
             hasGun = true;
             playerSprite.setTexture(playerWithGunTexture);
@@ -179,40 +214,37 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
             text.setFillColor(sf::Color::Green);
         }
         for (int i = 0; i < 10; ++i) window.draw(enemies[i]);
-        window.draw(playerSprite);
-        window.draw(healthText);
-        window.draw(text);
 
-		if (hasGun && sf::Mouse::isButtonPressed(sf::Mouse::Left) && bulletClock.getElapsedTime().asSeconds() > fireDelay) {
-            if (!gunshotBuffer.loadFromFile("assets/gunshot.ogg")) return -1;
-            gunshotSound.setBuffer(gunshotBuffer);
+#pragma region Gun Logic
+        if (hasGun && sf::Mouse::isButtonPressed(sf::Mouse::Left) && bulletClock.getElapsedTime().asSeconds() > fireDelay) {
+
             gunshotSound.play();
-			sf::Sprite bullet;
+            sf::Sprite bullet;
             bullet.setTexture(bulletTexture);
             bullets.push_back(bullet);
             bullets.back().setScale(0.09f, 0.09f);
-            bullets.back().setOrigin(5, 5); 
+            bullets.back().setOrigin(5, 5);
             sf::Vector2f center = {
             playerSprite.getPosition().x + playerSprite.getGlobalBounds().width / 2,
             playerSprite.getPosition().y + playerSprite.getGlobalBounds().height / 2
             };
             bullets.back().setPosition(center);
 
-			float mouseX = sf::Mouse::getPosition(window).x;
-			float mouseY = sf::Mouse::getPosition(window).y;
+            float mouseX = sf::Mouse::getPosition(window).x;
+            float mouseY = sf::Mouse::getPosition(window).y;
             sf::Vector2f playerCenter = {
                 playerSprite.getPosition().x + playerSprite.getGlobalBounds().width / 2.f,
                 playerSprite.getPosition().y + playerSprite.getGlobalBounds().height / 2.f
             };
             float angle = std::atan2(mouseY - playerCenter.y, mouseX - playerCenter.x);
             bullets.back().setRotation(angle * 180 / 3.14159f);
-			angles.push_back(angle);
-			bulletClock.restart();
-		}
+            angles.push_back(angle);
+            bulletClock.restart();
+        }
 
         float bulletSpeed = 1000.f;
 
-        for (int i = (int)bullets.size() - 1; i >= 0; --i) {           
+        for (int i = (int)bullets.size() - 1; i >= 0; --i) {
             bullets[i].move(bulletSpeed * dt * cos(angles[i]), bulletSpeed * dt * sin(angles[i]));
 
             sf::Vector2f pos = bullets[i].getPosition();
@@ -243,8 +275,13 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
             }
         }
 
+#pragma endregion
 
-        
+        window.draw(playerSprite);
+        window.draw(healthText);
+        window.draw(text);
+
+
         window.display();
     }
 
