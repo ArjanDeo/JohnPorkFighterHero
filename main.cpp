@@ -6,6 +6,7 @@
 #include <random>
 #include <string>
 #include <math.h>
+#include "enemy.h"
 
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow) {
 #pragma region Init
@@ -27,43 +28,39 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 
 #pragma region Sprites
 
+    sf::Texture gunTexture;
+    gunTexture.loadFromFile("assets/ak-47.png");
+    sf::Sprite gun;
+    gun.setTexture(gunTexture);
+    gun.setPosition(static_cast<float>(window.getSize().x * 0.2f), static_cast<float>(window.getSize().y * 0.2f));
+    gun.setScale(0.35f, 0.35f);
+
     sf::Sprite enemies[10];
-    sf::Texture enemyTexture;
-    enemyTexture.loadFromFile("assets/tim_cheese.png");
-
-    std::random_device rd;
-    std::mt19937 gen(rd());
-    std::uniform_int_distribution<> xrange(0, window.getSize().x);
-    std::uniform_int_distribution<> yrange(0, window.getSize().y);
-
-    for (int i = 0; i < 10; ++i) {
-        float x = static_cast<float>(xrange(gen));
-        float y = static_cast<float>(yrange(gen));
-        sf::Sprite enemy;
-        enemy.setTexture(enemyTexture);
-        enemy.setPosition(x, y);
-        enemy.setScale(0.45f, 0.45f);
+    for (int i = 0; i < 10; ++i) 
+    {
+		Enemy enemy("assets/tim_cheese.png", { 0.45f, 0.45f });
+		enemies[i] = enemy.getSprite();
+        sf::FloatRect playerBounds = playerSprite.getGlobalBounds();
+        sf::FloatRect gunBounds = gun.getGlobalBounds();
 
         sf::Vector2u windowSize = window.getSize();
+        float enemyWidth = enemies[i].getGlobalBounds().width;
+        float enemyHeight = enemies[i].getGlobalBounds().height;
 
-        sf::FloatRect enemyBounds = enemy.getGlobalBounds();
-        sf::FloatRect playerBounds = playerSprite.getGlobalBounds();
+        std::random_device rd;
+        std::mt19937 gen(rd());
+        std::uniform_real_distribution<float> distX(0.f, windowSize.x - enemyWidth);
+        std::uniform_real_distribution<float> distY(0.f, windowSize.y - enemyHeight);
 
-        auto isEnemyOutsideWindow = [&](const sf::FloatRect& bounds) {
-            return bounds.left < 0.f ||
-                bounds.top < 0.f ||
-                bounds.left + bounds.width > static_cast<float>(windowSize.x) ||
-                bounds.top + bounds.height > static_cast<float>(windowSize.y);
-            };
+        sf::Vector2f spawnPos;
 
-        while (enemyBounds.intersects(playerBounds) || isEnemyOutsideWindow(enemyBounds)) {
-            float x = static_cast<float>(xrange(gen));
-            float y = static_cast<float>(yrange(gen));
-            enemy.setPosition(x, y);
-
-            enemyBounds = enemy.getGlobalBounds();
-        }
-        enemies[i] = enemy;
+        do {
+            spawnPos = { distX(gen), distY(gen) };
+            enemies[i].setPosition(spawnPos);
+        } while (
+            enemies[i].getGlobalBounds().intersects(playerBounds) ||
+            enemies[i].getGlobalBounds().intersects(gunBounds)
+            );
     }
 
     sf::Texture background;
@@ -74,12 +71,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
         static_cast<float>(window.getSize().y) / background.getSize().y
     );
 
-    sf::Texture gunTexture;
-    gunTexture.loadFromFile("assets/ak-47.png");
-    sf::Sprite gun;
-    gun.setTexture(gunTexture);
-    gun.setPosition(static_cast<float>(window.getSize().x * 0.2f), static_cast<float>(window.getSize().y * 0.2f));
-    gun.setScale(0.35f, 0.35f);
+    
 
     bool hasGun = false;
     sf::Texture playerWithGunTexture;
@@ -199,12 +191,20 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
             bullet.setTexture(bulletTexture);
             bullets.push_back(bullet);
             bullets.back().setScale(0.09f, 0.09f);
-            bullets.back().setOrigin(5, 5);
-            bullets.back().setPosition(playerSprite.getPosition());
+            bullets.back().setOrigin(5, 5); 
+            sf::Vector2f center = {
+            playerSprite.getPosition().x + playerSprite.getGlobalBounds().width / 2,
+            playerSprite.getPosition().y + playerSprite.getGlobalBounds().height / 2
+            };
+            bullets.back().setPosition(center);
 
 			float mouseX = sf::Mouse::getPosition(window).x;
 			float mouseY = sf::Mouse::getPosition(window).y;
-			float angle = std::atan2(mouseY - playerSprite.getPosition().y, mouseX - playerSprite.getPosition().x);
+            sf::Vector2f playerCenter = {
+                playerSprite.getPosition().x + playerSprite.getGlobalBounds().width / 2.f,
+                playerSprite.getPosition().y + playerSprite.getGlobalBounds().height / 2.f
+            };
+            float angle = std::atan2(mouseY - playerCenter.y, mouseX - playerCenter.x);
             bullets.back().setRotation(angle * 180 / 3.14159f);
 			angles.push_back(angle);
 			bulletClock.restart();
