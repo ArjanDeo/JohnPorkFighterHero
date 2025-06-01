@@ -18,7 +18,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
     sf::Sound gunshotSound;
 
     sf::VideoMode desktopMode = sf::VideoMode::getDesktopMode();
-    sf::RenderWindow window(sf::VideoMode(desktopMode.width, desktopMode.height), "John Pork: Fighter Hero");
+    sf::RenderWindow window(sf::VideoMode(desktopMode.width - 20, desktopMode.height - 20), "John Pork: Fighter Hero");
 
     sf::Image icon;
     if (!icon.loadFromFile("assets/john_pork_is_calling.jpg")) return -1;
@@ -95,12 +95,13 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
     sf::Music music;
     if (!music.openFromFile("assets/LegionMusic.ogg")) return -1;
     music.setLoop(true);
-    music.setVolume(35);
+    music.setVolume(20);
     music.play();
 
     sf::Music ringtone;
     if (!ringtone.openFromFile("assets/john_pork_is_calling.ogg")) return -1;
     ringtone.setLoop(true);
+    music.setVolume(35);
     ringtone.play();
 
 #pragma endregion
@@ -108,8 +109,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
     sf::RectangleShape menuBackground;
 	menuBackground.setSize(sf::Vector2f(window.getSize()));
 	menuBackground.setFillColor(sf::Color(0, 0, 0, 150)); // Semi-transparent black
-    Button closeGameButton("Close Game");
-    closeGameButton.setPosition(50, 50);
+    Button closeGameButton("Close Game", 50, 50);
     bool menuState = false; 
 
 #pragma endregion
@@ -143,7 +143,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
             window.display();
 
             if (sf::Mouse::isButtonPressed(sf::Mouse::Left) &&
-                closeGameButton.buttonShape.getGlobalBounds().contains(
+                closeGameButton.getShape().getGlobalBounds().contains(
                     static_cast<sf::Vector2f>(sf::Mouse::getPosition(window)))) {
                 window.close();
             }
