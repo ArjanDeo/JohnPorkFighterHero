@@ -9,23 +9,24 @@
 #include "player.h"
 #include "button.h"
 
-void spawnEnemies(sf::Sprite(&enemies)[10], const sf::Sprite& playerSprite, const sf::Sprite& gun, const sf::RenderWindow& window)
+static void spawnEnemies(sf::Sprite(&enemies)[10], const sf::Sprite& playerSprite, const sf::Sprite& gun, const sf::RenderWindow& window)
 {
     for (int i = 0; i < 10; ++i)
     {
-        Enemy enemy("assets/tim_cheese.png", { 0.45f, 0.45f });
+        Enemy enemy("assets/characters/tim_cheese.png", { 0.45f, 0.45f });
         enemies[i] = enemy.getSprite();
         sf::FloatRect playerBounds = playerSprite.getGlobalBounds();
         sf::FloatRect gunBounds = gun.getGlobalBounds();
-
         sf::Vector2u windowSize = window.getSize();
         float enemyWidth = enemies[i].getGlobalBounds().width;
         float enemyHeight = enemies[i].getGlobalBounds().height;
+        float marginX = windowSize.x * 0.2;
+        float marginY = windowSize.y * 0.2;
 
+        std::uniform_real_distribution<float> distX(windowSize.x - marginX);
+        std::uniform_real_distribution<float> distY(windowSize.y - marginY);
         std::random_device rd;
         std::mt19937 gen(rd());
-        std::uniform_real_distribution<float> distX(0.f, windowSize.x - enemyWidth);
-        std::uniform_real_distribution<float> distY(0.f, windowSize.y - enemyHeight);
 
         sf::Vector2f spawnPos;
 
@@ -36,6 +37,7 @@ void spawnEnemies(sf::Sprite(&enemies)[10], const sf::Sprite& playerSprite, cons
             enemies[i].getGlobalBounds().intersects(playerBounds) ||
             enemies[i].getGlobalBounds().intersects(gunBounds)
             );
+
     }
 }
 
@@ -47,7 +49,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
     sf::SoundBuffer gunshotBuffer;
     sf::Sound gunshotSound;
 
-    if (!gunshotBuffer.loadFromFile("assets/gunshot.ogg")) return -1;
+    if (!gunshotBuffer.loadFromFile("assets/sound/gunshot.ogg")) return -1;
     gunshotSound.setBuffer(gunshotBuffer);
 	gunshotSound.setVolume(50);
 
@@ -55,22 +57,32 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
     sf::RenderWindow window(sf::VideoMode(desktopMode.width - 20, desktopMode.height - 20), "John Pork: Fighter Hero");
 
     sf::Image icon;
-    if (!icon.loadFromFile("assets/john_pork_is_calling.jpg")) return -1;
+    if (!icon.loadFromFile("assets/meta/john_pork_is_calling.jpg")) return -1;
     window.setIcon(icon.getSize().x, icon.getSize().y, icon.getPixelsPtr());
 #pragma endregion
 
 #pragma region Characters / Sprites
     sf::Texture playerDefaultTexture;
-    playerDefaultTexture.loadFromFile("assets/john_pork.png");
-    Player player("assets/john_pork.png", "John Pork", 100);
+    playerDefaultTexture.loadFromFile("assets/characters/john_pork.png");
+    Player player("assets/characters/john_pork.png", "John Pork", 100);
     sf::Sprite playerSprite = player.getSprite();
 
     sf::Texture gunTexture;
-    gunTexture.loadFromFile("assets/ak-47.png");
+    gunTexture.loadFromFile("assets/entities/ak-47.png");
     sf::Sprite gun;
     gun.setTexture(gunTexture);
-    gun.setPosition(static_cast<float>(window.getSize().x * 0.2f), static_cast<float>(window.getSize().y * 0.2f));
-    gun.setScale(0.35f, 0.35f);
+    float marginX = window.getSize().x * 0.2;
+    float marginY = window.getSize().y * 0.2;
+
+    std::uniform_real_distribution<float> distX(window.getSize().x - marginX);
+    std::uniform_real_distribution<float> distY(window.getSize().y - marginY);
+    std::random_device rd;
+    std::mt19937 gen(rd());
+
+    sf::Vector2f spawnPos;
+    spawnPos = { distX(gen), distY(gen) };
+    gun.setPosition(spawnPos);
+    gun.setScale(0.4f, 0.4f);
 
     sf::Sprite enemies[10];
 	spawnEnemies(enemies, playerSprite, gun, window);
@@ -78,7 +90,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 
 #pragma region Music + Font 
     sf::Texture background;
-    background.loadFromFile("assets/background.jpg");
+    background.loadFromFile("assets/background-4k.jpg");
     sf::Sprite backgroundSprite(background);
     backgroundSprite.setScale(
         static_cast<float>(window.getSize().x) / background.getSize().x,
@@ -89,15 +101,15 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 
     bool hasGun = false;
     sf::Texture playerWithGunTexture;
-    playerWithGunTexture.loadFromFile("assets/john_pork_with_gun.png");
+    playerWithGunTexture.loadFromFile("assets/characters/john_pork_with_gun.png");
 
     sf::Texture bulletTexture;
-    bulletTexture.loadFromFile("assets/bullet.png");
+    bulletTexture.loadFromFile("assets/entities/bullet.png");
     std::vector<sf::Sprite> bullets;
     std::vector<float> angles;
 
     sf::Font font;
-    if (!font.loadFromFile("assets/porky.ttf")) return -1;
+    if (!font.loadFromFile("assets/meta/porky.ttf")) return -1;
     sf::Text text("Objective: Eradicate Tim Cheese (If you die, game over)", font, 50);
     text.setFillColor(sf::Color::Magenta);
 
@@ -105,13 +117,13 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
     healthText.setFillColor(sf::Color::Green);
 
     sf::Music music;
-    if (!music.openFromFile("assets/LegionMusic.ogg")) return -1;
+    if (!music.openFromFile("assets/sound/LegionMusic.ogg")) return -1;
     music.setLoop(true);
     music.setVolume(20);
     music.play();
 
     sf::Music ringtone;
-    if (!ringtone.openFromFile("assets/john_pork_is_calling.ogg")) return -1;
+    if (!ringtone.openFromFile("assets/sound/john_pork_is_calling.ogg")) return -1;
     ringtone.setLoop(true);
     music.setVolume(35);
     ringtone.play();
@@ -138,6 +150,10 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
     sf::Clock damageCooldownClocks[10];
     sf::Time damageCooldown = sf::seconds(1.f);
     float fireDelay = 0.2f;
+    bool movingUp = false;
+    bool movingDown = false;
+    bool movingLeft = false;
+    bool movingRight = false;
 #pragma endregion
 
 #pragma region Game Loop
@@ -146,20 +162,68 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 
         sf::Event event;
         while (window.pollEvent(event)) {
+            if (event.type == sf::Event::Resized)
+                window.setView(sf::View(sf::FloatRect(0, 0, event.size.width, event.size.height)));
+
             if (event.type == sf::Event::Closed) {
                 window.close();
             }
+
             if (event.type == sf::Event::KeyPressed) {
                 if (event.key.code == sf::Keyboard::Escape) {
-                    if (menuState) {
-                        music.play();
-						ringtone.play();
-						gunshotSound.play();
-                    }
                     menuState = !menuState;
+                    if (menuState) {
+                        music.pause();
+                        ringtone.pause();
+                        gunshotSound.pause();
+                    }
+                    else {
+                        music.play();
+                        ringtone.play();
+                        gunshotSound.play();
+                    }
+                }
+                if (event.key.code == sf::Keyboard::W) movingUp = true;
+                if (event.key.code == sf::Keyboard::A) movingLeft = true;
+                if (event.key.code == sf::Keyboard::S) movingDown = true;
+                if (event.key.code == sf::Keyboard::D) movingRight = true;
+            }
+
+            if (event.type == sf::Event::KeyReleased) {
+                if (event.key.code == sf::Keyboard::W) movingUp = false;
+                if (event.key.code == sf::Keyboard::A) movingLeft = false;
+                if (event.key.code == sf::Keyboard::S) movingDown = false;
+                if (event.key.code == sf::Keyboard::D) movingRight = false;
+            }
+            if (event.type == sf::Event::MouseButtonPressed) {
+                if (hasGun && event.key.code == sf::Mouse::Left && bulletClock.getElapsedTime().asSeconds() > fireDelay) {
+
+                    gunshotSound.play();
+                    sf::Sprite bullet;
+                    bullet.setTexture(bulletTexture);
+                    bullets.push_back(bullet);
+                    bullets.back().setScale(0.09f, 0.09f);
+                    bullets.back().setOrigin(5, 5);
+                    sf::Vector2f center = {
+                    playerSprite.getPosition().x + playerSprite.getGlobalBounds().width / 2,
+                    playerSprite.getPosition().y + playerSprite.getGlobalBounds().height / 2
+                    };
+                    bullets.back().setPosition(center);
+
+                    float mouseX = sf::Mouse::getPosition(window).x;
+                    float mouseY = sf::Mouse::getPosition(window).y;
+                    sf::Vector2f playerCenter = {
+                        playerSprite.getPosition().x + playerSprite.getGlobalBounds().width / 2.f,
+                        playerSprite.getPosition().y + playerSprite.getGlobalBounds().height / 2.f
+                    };
+                    float angle = std::atan2(mouseY - playerCenter.y, mouseX - playerCenter.x);
+                    bullets.back().setRotation(angle * 180 / 3.14159f);
+                    angles.push_back(angle);
+                    bulletClock.restart();
                 }
             }
         }
+        bool allEnemiesRemoved = true;
 
         if (menuState) {
             window.clear();
@@ -180,47 +244,53 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 			ringtone.pause();
 			gunshotSound.pause();
             window.display();
+            while (window.pollEvent(event)) {
+                if (event.type == sf::Event::MouseButtonPressed) {
+                    if (event.key.code == sf::Mouse::Left) {
+                        if (menuButtons[0].getShape().getGlobalBounds().contains(static_cast<sf::Vector2f>(sf::Mouse::getPosition(window)))) 
+                        {
+                            window.close();
+                        }
+                        if (menuButtons[1].getShape().getGlobalBounds().contains(static_cast<sf::Vector2f>(sf::Mouse::getPosition(window)))) 
+                        {
+                            window.clear();
+                            window.draw(backgroundSprite);
+                            hasGun = false;
+                            spawnPos = { distX(gen), distY(gen) };
+                            gun.setPosition(spawnPos);
+                            if (!hasGun) window.draw(gun);
 
-            if (sf::Mouse::isButtonPressed(sf::Mouse::Left) &&
-                menuButtons[0].getShape().getGlobalBounds().contains(
-                    static_cast<sf::Vector2f>(sf::Mouse::getPosition(window)))) {
-                window.close();
-            }
-            if (sf::Mouse::isButtonPressed(sf::Mouse::Left) &&
-                menuButtons[1].getShape().getGlobalBounds().contains(
-                    static_cast<sf::Vector2f>(sf::Mouse::getPosition(window)))) {
-                window.clear();
-                window.draw(backgroundSprite);
-                hasGun = false;
+                            playerSprite.setTexture(playerDefaultTexture);
 
-                if (!hasGun) window.draw(gun);
-                
-                playerSprite.setTexture(playerDefaultTexture);
+                            spawnEnemies(enemies, playerSprite, gun, window);
+                            for (int i = 0; i < 10; ++i) window.draw(enemies[i]);
+                            window.draw(playerSprite);
+                            bullets.clear();
 
-                spawnEnemies(enemies, playerSprite, gun, window);
-                for (int i = 0; i < 10; ++i) window.draw(enemies[i]);
-                window.draw(playerSprite);
-				bullets.clear();
-
-				angles.clear();
-				player.setHealth(100);
-                window.draw(healthText);
-                window.draw(text);
-				music.play();
-				ringtone.play();
-				window.display();
-				menuState = false;
-                continue;
+                            angles.clear();
+                            player.setHealth(100);
+                            window.draw(healthText);
+                            text.setString("Objective: Eradicate Tim Cheese (If you die, game over)");
+                            text.setFillColor(sf::Color::Magenta);
+                            window.draw(text);
+                            music.play();
+                            ringtone.play();
+                            window.display();
+                            menuState = false;
+                            continue;
+                        }
+                    }
+                }
             }
             continue;
         }
 
         #pragma region Controls
-        float speed = 500.f;
-        if (sf::Keyboard::isKeyPressed(sf::Keyboard::W)) playerSprite.move(0.f, -speed * dt);
-        if (sf::Keyboard::isKeyPressed(sf::Keyboard::A)) playerSprite.move(-speed * dt, 0.f);
-        if (sf::Keyboard::isKeyPressed(sf::Keyboard::S)) playerSprite.move(0.f, speed * dt);
-        if (sf::Keyboard::isKeyPressed(sf::Keyboard::D)) playerSprite.move(speed * dt, 0.f);        
+        float speed = 500.f;       
+        if (movingUp) playerSprite.move(0.f, -speed * dt);
+        if (movingDown) playerSprite.move(0.f, speed * dt);
+        if (movingLeft) playerSprite.move(-speed * dt, 0.f);
+        if (movingRight) playerSprite.move(speed * dt, 0.f);
         #pragma endregion
 
         healthText.setPosition(0.f, 60.f);
@@ -231,7 +301,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
             hasGun = true;
             playerSprite.setTexture(playerWithGunTexture);
 
-            if (!rifleBuffer.loadFromFile("assets/rifle_load.ogg")) return -1;
+            if (!rifleBuffer.loadFromFile("assets/sound/rifle_load.ogg")) return -1;
             rifleSound.setBuffer(rifleBuffer);
             rifleSound.play();
         }
@@ -262,7 +332,6 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 
         if (!hasGun) window.draw(gun);
 
-        bool allEnemiesRemoved = true;
         sf::Vector2f offScreenPos(window.getSize().x + 100.f, window.getSize().y + 100.f);
 
         for (int i = 0; i < 10; ++i) {
@@ -279,31 +348,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
         for (int i = 0; i < 10; ++i) window.draw(enemies[i]);
 
 #pragma region Gun Logic
-        if (hasGun && sf::Mouse::isButtonPressed(sf::Mouse::Left) && bulletClock.getElapsedTime().asSeconds() > fireDelay) {
-
-            gunshotSound.play();
-            sf::Sprite bullet;
-            bullet.setTexture(bulletTexture);
-            bullets.push_back(bullet);
-            bullets.back().setScale(0.09f, 0.09f);
-            bullets.back().setOrigin(5, 5);
-            sf::Vector2f center = {
-            playerSprite.getPosition().x + playerSprite.getGlobalBounds().width / 2,
-            playerSprite.getPosition().y + playerSprite.getGlobalBounds().height / 2
-            };
-            bullets.back().setPosition(center);
-
-            float mouseX = sf::Mouse::getPosition(window).x;
-            float mouseY = sf::Mouse::getPosition(window).y;
-            sf::Vector2f playerCenter = {
-                playerSprite.getPosition().x + playerSprite.getGlobalBounds().width / 2.f,
-                playerSprite.getPosition().y + playerSprite.getGlobalBounds().height / 2.f
-            };
-            float angle = std::atan2(mouseY - playerCenter.y, mouseX - playerCenter.x);
-            bullets.back().setRotation(angle * 180 / 3.14159f);
-            angles.push_back(angle);
-            bulletClock.restart();
-        }
+        
 
         float bulletSpeed = 1000.f;
 
