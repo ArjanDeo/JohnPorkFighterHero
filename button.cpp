@@ -1,14 +1,10 @@
 #include "button.h"
 
-Button::Button(const std::string& text, const float x, const float y) : x(x), y(y)
+Button::Button(const std::string& text, const float x, const float y, const sf::Font& font) : x(x), y(y)
 {
     buttonShape.setSize({ 125.f, 62.5f });
     buttonShape.setFillColor(sf::Color::Blue);
     setPosition();
-
-    if (!font.loadFromFile("assets/porky.ttf")) {
-		throw std::runtime_error("Failed to load font from assets/porky.ttf");
-    }
 
     buttonText.setFont(font);
     buttonText.setString(text);

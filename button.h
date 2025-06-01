@@ -6,7 +6,7 @@
 class Button
 {
 public:
-    Button(const std::string& text, const float x, const float y);
+    Button(const std::string& text, const float x, const float y, const sf::Font& font);
     void draw(sf::RenderWindow& window);
     void setPosition();
     const sf::RectangleShape& getShape() const;
