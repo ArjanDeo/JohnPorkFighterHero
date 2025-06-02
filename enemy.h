@@ -1,17 +1,24 @@
 #pragma once
 #include <SFML/Graphics.hpp>
-#include <random>
-class Enemy
-{
-	public:
-		Enemy(const std::string& texturePath, sf::Vector2f scale = { 0.45f, 0.45f });
-		sf::Sprite& getSprite();
-	private:
-		void setSprite();
-		sf::Vector2f setPosition();
-		sf::Sprite sprite;
-		sf::Vector2f position;
-		sf::Vector2f scale;
-		sf::Texture enemyTexture;
-		std::string texturePath;
+#include "assetManager.h"
+
+class Enemy {
+public:
+    Enemy(const std::string& texturePath, AssetManager& assetManager, sf::Vector2f scale);
+
+    void spawn(const sf::Vector2f& position);
+    void spawnAvoiding(const sf::FloatRect& avoidArea1, const sf::FloatRect& avoidArea2, const sf::Vector2u& windowSize);
+
+    sf::Sprite& getSprite() { return sprite; }
+    const sf::Sprite& getSprite() const { return sprite; }
+
+    // Add more enemy-specific functionality as needed
+    // void takeDamage(int amount);
+    // bool isAlive() const;
+    // etc.
+
+private:
+    sf::Sprite sprite;
+    const sf::Texture& texture;
+    sf::Vector2f scale;
 };

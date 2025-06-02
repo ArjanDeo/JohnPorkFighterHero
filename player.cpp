@@ -1,9 +1,10 @@
 #include "player.h"
-#include <SFML/Graphics.hpp>
 
-Player::Player(const std::string& texturePath, const std::string& name, int health) : texturePath(texturePath), name(name), health(health)
+Player::Player(const sf::Texture& texture, const std::string& name, int health, AssetManager& assetManager) 
+    : texture(texture), name(name), health(health), assetManager(assetManager)
 {
     health = 100;
+	this->texture = texture;
     setSprite();
 }
 
@@ -15,8 +16,8 @@ int Player::getHealth() const {
     return health;
 }
 
-const std::string& Player::getTexturePath() const {
-    return texturePath;
+const sf::Texture& Player::getTexture() {
+    return texture;
 }
 sf::Sprite& Player::getSprite() {
     return sprite;
@@ -28,10 +29,7 @@ void Player::setHealth(int newHealth) {
 }
 
 void Player::setSprite() {
-    if (!texture.loadFromFile(texturePath)) {
-        throw std::runtime_error("Failed to load texture from " + texturePath);
-    }
-    sprite.setTexture(texture);
+	sprite.setTexture(texture);
     sprite.setPosition(100.f, 100.f);
 	sprite.setScale(0.85f, 0.85f);
 }

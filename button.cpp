@@ -34,3 +34,9 @@ void Button::draw(sf::RenderWindow& window)
 const sf::RectangleShape& Button::getShape() const {
 	return buttonShape;
 }
+void Button::setText(const std::string& text) {
+	buttonText.setString(text);
+	auto textBounds = buttonText.getLocalBounds();
+	buttonText.setOrigin(textBounds.left + textBounds.width / 2.f,
+		textBounds.top + textBounds.height / 2.f);
+}

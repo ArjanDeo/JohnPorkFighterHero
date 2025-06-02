@@ -1,37 +1,33 @@
+// enemy.cpp
 #include "enemy.h"
+#include <random>
 
-Enemy::Enemy(const std::string& texturePath, sf::Vector2f scale) : texturePath(texturePath), scale(scale)
+Enemy::Enemy(const std::string& texturePath, AssetManager& assetManager, sf::Vector2f scale)
+    : texture(assetManager.getTexture(texturePath)), scale(scale)
 {
-	this->position = setPosition();
-	setSprite();
-}
-
-sf::Vector2f Enemy::setPosition() {
-	sf::VideoMode desktopMode = sf::VideoMode::getDesktopMode();
-	std::random_device rd;
-	std::mt19937 gen(rd());
-	std::uniform_int_distribution<> xrange(0, desktopMode.width);
-	std::uniform_int_distribution<> yrange(0, desktopMode.height);
-	float x = static_cast<float>(xrange(gen));
-	float y = static_cast<float>(yrange(gen));
-	return sf::Vector2f(x, y);
-}
-
-sf::Sprite& Enemy::getSprite() {
-	return sprite;
-}
-void Enemy::setSprite() {
-    static sf::Texture sharedTexture;
-    static bool textureLoaded = false;
-
-    if (!textureLoaded) {
-        if (!sharedTexture.loadFromFile(texturePath)) {
-            throw std::runtime_error("Failed to load enemy texture from " + texturePath);
-        }
-        textureLoaded = true;
-    }
-
-    sprite.setTexture(sharedTexture);
+    sprite.setTexture(texture);
     sprite.setScale(scale);
+}
+
+void Enemy::spawn(const sf::Vector2f& position) {
     sprite.setPosition(position);
+}
+
+void Enemy::spawnAvoiding(const sf::FloatRect& avoidArea1, const sf::FloatRect& avoidArea2, const sf::Vector2u& windowSize) {
+    const float marginX = windowSize.x * 0.2f;
+    const float marginY = windowSize.y * 0.2f;
+
+    std::random_device rd;
+    std::mt19937 gen(rd());
+    std::uniform_real_distribution<float> distX(0.0f, windowSize.x - marginX);
+    std::uniform_real_distribution<float> distY(0.0f, windowSize.y - marginY);
+
+    sf::Vector2f spawnPos;
+    sf::FloatRect enemyBounds;
+
+    do {
+        spawnPos = { distX(gen), distY(gen) };
+        sprite.setPosition(spawnPos);
+        enemyBounds = sprite.getGlobalBounds();
+    } while (enemyBounds.intersects(avoidArea1) || enemyBounds.intersects(avoidArea2));
 }

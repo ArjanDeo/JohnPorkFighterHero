@@ -1,16 +1,16 @@
 #pragma once
 #include <string>
 #include <SFML/Graphics.hpp>
+#include "assetManager.h"
 
 class Player {
 public:
-    Player(const std::string& texturePath, const std::string& name, int health);
-    
+    Player(const sf::Texture& texture, const std::string& name, int health, AssetManager& assetManager);   
 
     // Getters
     std::string getName() const;
     int getHealth() const;
-    const std::string& getTexturePath() const;
+    const sf::Texture& getTexture();
     sf::Sprite& getSprite();
 
     // Setters
@@ -20,6 +20,7 @@ public:
     bool isAlive() const;
 
 private:
+	AssetManager& assetManager;
     std::string name;
     int health;
     std::string texturePath;
