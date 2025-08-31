@@ -5,7 +5,7 @@
             "name": "Run JohnPorkFighterHero",
             "type": "cppdbg",
             "request": "launch",
-            "program": "${workspaceFolder}/out/build/DevConfig/JohnPorkFighterHero.exe",
+            "program": "${workspaceFolder}/out/build/Ninja-GCC/JohnPorkFighterHero.exe",
             "cwd": "${workspaceFolder}",
             "MIMode": "gdb",
             "preLaunchTask": "build JohnPorkFighterHero"

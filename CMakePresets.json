@@ -1,9 +1,9 @@
 {
-    "version": 8,
+    "version": 3,
     "configurePresets": [
         {
-            "name": "DevConfig",
-            "displayName": "Developer Config",
+            "name": "Ninja-GCC",
+            "displayName": "Ninja-GCC Config",
             "description": "Sets Ninja generator, build and install directory",
             "generator": "Ninja",
             "binaryDir": "${sourceDir}/out/build/${presetName}",
