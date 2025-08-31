@@ -15,7 +15,7 @@ find_package(SFML CONFIG REQUIRED COMPONENTS Graphics Window System Audio)
 
 
 
-add_executable(JohnPorkFighterHero src/main.cpp src/AssetManager.cpp)
+add_executable(JohnPorkFighterHero src/Main.cpp src/AssetManager.cpp src/Button.cpp)
 
 add_custom_command(TARGET JohnPorkFighterHero POST_BUILD
     COMMAND ${CMAKE_COMMAND} -E copy_directory

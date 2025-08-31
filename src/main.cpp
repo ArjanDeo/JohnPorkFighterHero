@@ -2,37 +2,13 @@
 #include <SFML/Window.hpp>
 #include <SFML/Graphics.hpp>
 #include "AssetManager.h"
-sf::Vector2f lastOverlaySize{0.f, 0.f};
+#include "Button.h"
+#include "GameState.h"
 AssetManager assetManager("assets");
 sf::Music currentMusic;
 sf::Font &font = assetManager.getFont("Raleway.ttf");
-enum GameStateEnum {
-    MAIN_MENU,
-    PAUSE_MENU,
-    MISSION_MENU,
-    MISSION
-};
+std::vector<Button> menuButtons;
 
-struct Button {
-    sf::RectangleShape shape;
-    sf::Text text;
-    bool clicked = false;
-    // Proper constructor
-    Button(const sf::Font &font, const std::string &label, unsigned int charSize = 36)
-        : text(font, label, charSize) // font is passed by reference
-    {}
-
-    bool isMouseOver(sf::RenderWindow &window) {
-        sf::Vector2i mousePos = sf::Mouse::getPosition(window);
-        return shape.getGlobalBounds().contains({static_cast<float>(mousePos.x), static_cast<float>(mousePos.y)});
-    }
-
-    void draw(sf::RenderWindow &window) {
-        window.draw(shape);
-        window.draw(text);
-    }
-};
-    std::vector<Button> menuButtons;
 
 sf::Image GameIcon() {
     sf::Texture &iconTexture = assetManager.getTexture("gameIcon.png");
@@ -182,7 +158,7 @@ UpdateButtonLayout(overlay);
 }
 
 int main() {
-    GameStateEnum gameState =  GameStateEnum::MAIN_MENU;
+    GameState gameState = GameState::MAIN_MENU;
 
     sf::RenderWindow window = GameWindow();
     while (window.isOpen())
@@ -190,7 +166,7 @@ int main() {
         window.clear();
         switch (gameState)
         {
-        case GameStateEnum::MAIN_MENU:
+        case GameState::MAIN_MENU:
             DrawMainMenu(window);
             break;
         
@@ -200,7 +176,7 @@ int main() {
         // check all the window's events that were triggered since the last iteration of the loop
         while (const std::optional event = window.pollEvent())
         {
-            // "close requested" event: we close the windowf
+            // "close requested" event: we close the window
             if (event->is<sf::Event::Closed>())
                 window.close();
             if (const auto *windowResized = event->getIf<sf::Event::Resized>()) {
@@ -210,24 +186,15 @@ int main() {
                 );
 
                 window.setView(sf::View(visibleArea));
+            } 
+           for (auto &btn : menuButtons) {
+            if (btn.isClicked(window, event)) {
+                if (btn.text.getString() == "Exit")
+                    window.close();
+                else
+                    btn.shape.setFillColor(sf::Color::Magenta);
             }
-            if (const auto* mouseBtnPressed = event->getIf<sf::Event::MouseButtonPressed>()) {
-                if (mouseBtnPressed->button == sf::Mouse::Button::Left) {
-                    if (gameState == GameStateEnum::MAIN_MENU) {
-                        for (auto &btn : menuButtons) {
-                            if (btn.isMouseOver(window)) {
-                                if (btn.text.getString() == "Exit")
-                                {
-                                    window.close();
-                                }
-                                btn.shape.setFillColor({51, 158, 158, 200});
-                                btn.clicked = true;
-                                break;
-                            }
-                        }
-                    }
-                }
-            }            
+           } 
         }
         window.display();
     }
