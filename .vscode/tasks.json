@@ -14,7 +14,7 @@
                 "isDefault": true
             },
             "problemMatcher": ["$gcc"],
-            "detail": "Builds the project using CMake preset DevConfig"
+            "detail": "Builds the project using CMake preset Ninja-GCC"
         }
     ]
 }

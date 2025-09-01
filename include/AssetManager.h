@@ -5,8 +5,7 @@
 class AssetManager
 {
 public:
-	AssetManager(const std::string& assetsDirectory);
-
+	AssetManager(const std::string& newDirectory);
 	sf::SoundBuffer& getSoundBuffer(const std::string& soundName);
 	sf::Texture& getTexture(const std::string& textureName);
 	sf::Font& getFont(const std::string& fontName);
@@ -16,7 +15,7 @@ private:
 		IMAGE,
 		FONT
 	};
-	static const std::map<DirectoriesEnum, std::string> Directories;
+	static const std::map<DirectoriesEnum, std::string>& getDirectories();
 	std::string assetsDirectory;
 	std::map<std::string, sf::SoundBuffer> soundBuffers;
 	std::map<std::string, sf::Texture> textures;

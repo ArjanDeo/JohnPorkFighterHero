@@ -5,17 +5,9 @@ set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
-# Force MinGW/GCC to statically link its runtime
-if (MINGW)
-    set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -static-libgcc -static-libstdc++")
-endif()
-
-
 find_package(SFML CONFIG REQUIRED COMPONENTS Graphics Window System Audio)
 
-
-
-add_executable(JohnPorkFighterHero src/Main.cpp src/AssetManager.cpp src/Button.cpp)
+add_executable(JohnPorkFighterHero src/Main.cpp src/AssetManager.cpp src/Button.cpp  "include/MainMenu.h"  "include/MainMenu.h" "src/MainMenu.cpp" "include/Common.h" "src/Common.cpp")
 
 add_custom_command(TARGET JohnPorkFighterHero POST_BUILD
     COMMAND ${CMAKE_COMMAND} -E copy_directory

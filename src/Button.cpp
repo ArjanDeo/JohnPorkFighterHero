@@ -13,7 +13,7 @@ bool Button::isMouseOver(sf::RenderWindow &window) const {
     sf::Vector2i mousePos = sf::Mouse::getPosition(window);
     return shape.getGlobalBounds().contains({ static_cast<float>(mousePos.x), static_cast<float>(mousePos.y) });
 }
-//argument list for class template "std::optional" is missingC/C++(441)
+
 bool Button::isClicked(sf::RenderWindow &window, const std::optional<sf::Event> &event) {
     if (!event.has_value()) return false;
     
