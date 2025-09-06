@@ -14,13 +14,14 @@
 
 class MainMenu {
 public:
-	MainMenu(sf::RenderWindow& window, AssetManager& assetManager);
+	MainMenu(sf::RenderWindow& window, AssetManager& assetManager, GameState& gameState);
 	~MainMenu();
 	void DrawMainMenu();
 	void handleEvents(const std::optional<sf::Event>& event);
 
 private:
 	Common common;
+	GameState& gameState;
 	sf::RenderWindow& window;
 	AssetManager& assetManager;
 	sf::Font& font;

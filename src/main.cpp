@@ -5,11 +5,10 @@
 #include "Button.h"
 #include "GameState.h"
 #include "MainMenu.h"
-AssetManager assetManager("assets");
-sf::Font& font = assetManager.getFont("Raleway.ttf");
-sf::Music currentMusic;
+#include "SettingsMenu.h"
 
-sf::Image GameIcon() {
+
+static sf::Image GameIcon(AssetManager &assetManager) {
     sf::Texture &iconTexture = assetManager.getTexture("gameIcon.png");
     
     sf::Image iconImage = iconTexture.copyToImage();
@@ -17,45 +16,37 @@ sf::Image GameIcon() {
     return iconImage;
 }
 
-sf::RenderWindow GameWindow() {
+static sf::RenderWindow GameWindow(AssetManager& assetManager) {
     sf::RenderWindow window;
     sf::VideoMode desktop = sf::VideoMode::getDesktopMode();
-    sf::Image gameIcon = GameIcon();
+    sf::Image gameIcon = GameIcon(assetManager);
 
     window.create(desktop, "John Pork: Fighter Hero");
     window.setIcon(gameIcon.getSize(), gameIcon.getPixelsPtr());
     return window;
 }
 
-
-
 int main() {
-    GameState gameState = GameState::MAIN_MENU;
+    AssetManager assetManager("assets");
+    sf::Font& font = assetManager.getFont("Raleway.ttf");
+    sf::Music currentMusic;
+    GameState gameState;
 
-    sf::RenderWindow window = GameWindow();
+	gameState = GameState::MAIN_MENU;
+
+    sf::RenderWindow window = GameWindow(assetManager);
     const sf::Vector2u MIN_SIZE(1200, 720);
 	window.setMinimumSize(MIN_SIZE);
-
-    MainMenu mainMenu(window, assetManager);
-
+    MainMenu mainMenu(window, assetManager, gameState);
+    SettingsMenu settingsMenu(window, assetManager, gameState);
     while (window.isOpen())
     {
-        window.clear();
-        switch (gameState)
-        {
-        case GameState::MAIN_MENU:
-            mainMenu.DrawMainMenu();
-            break;
-        
-        default:
-            break;
-        }
         while (const std::optional event = window.pollEvent())
         {
             if (event->is<sf::Event::Closed>())
                 window.close();
 
-            if (const auto *windowResized = event->getIf<sf::Event::Resized>()) {
+            if (const auto* windowResized = event->getIf<sf::Event::Resized>()) {
                 sf::FloatRect visibleArea(
                     sf::Vector2f(0.f, 0.f),
                     sf::Vector2f(windowResized->size.x, windowResized->size.y)
@@ -63,9 +54,26 @@ int main() {
                 window.setView(sf::View(visibleArea));
             }
 
-			if (gameState == GameState::MAIN_MENU)
-				mainMenu.handleEvents(event);
+            if (gameState == GameState::MAIN_MENU)
+                mainMenu.handleEvents(event);
+            else if (gameState == GameState::SETTINGS_MENU)
+                settingsMenu.handleEvents(event);
         }
+
+        window.clear();
+
+        switch (gameState)
+        {
+        case GameState::MAIN_MENU:
+            mainMenu.DrawMainMenu();
+            break;
+        case GameState::SETTINGS_MENU:
+            settingsMenu.DrawSettingsMenu();
+            break;
+        default:
+            break;
+        }
+        
         window.display();
     }
     return 0;

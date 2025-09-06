@@ -56,3 +56,13 @@ void AssetManager::loadFont(const std::string& fontName) {
 	}
 	fonts[fontName] = font; // Add the font to the map
 }
+
+void AssetManager::DeleteSoundBuffer(const std::string& soundName) {
+	soundBuffers.erase(soundName);
+}
+void AssetManager::DeleteTexture(const std::string& textureName) {
+	textures.erase(textureName);
+}
+void AssetManager::DeleteFont(const std::string& fontName) {
+	fonts.erase(fontName);
+}

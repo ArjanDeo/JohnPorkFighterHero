@@ -9,6 +9,10 @@ public:
 	sf::SoundBuffer& getSoundBuffer(const std::string& soundName);
 	sf::Texture& getTexture(const std::string& textureName);
 	sf::Font& getFont(const std::string& fontName);
+
+	void DeleteSoundBuffer(const std::string& soundName);
+	void DeleteTexture(const std::string& textureName);
+	void DeleteFont(const std::string& fontName);
 private:
 	enum DirectoriesEnum {
 		SOUND,

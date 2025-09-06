@@ -7,7 +7,7 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 
 find_package(SFML CONFIG REQUIRED COMPONENTS Graphics Window System Audio)
 
-add_executable(JohnPorkFighterHero src/Main.cpp src/AssetManager.cpp src/Button.cpp  "include/MainMenu.h"  "include/MainMenu.h" "src/MainMenu.cpp" "include/Common.h" "src/Common.cpp")
+add_executable(JohnPorkFighterHero src/Main.cpp src/AssetManager.cpp src/Button.cpp  "include/MainMenu.h"  "include/MainMenu.h" "src/MainMenu.cpp" "include/Common.h" "src/Common.cpp" "include/SettingsMenu.h" "src/SettingsMenu.cpp")
 
 add_custom_command(TARGET JohnPorkFighterHero POST_BUILD
     COMMAND ${CMAKE_COMMAND} -E copy_directory

@@ -1,18 +1,19 @@
 #include "Common.h"
 #include "MainMenu.h"
-MainMenu::MainMenu(sf::RenderWindow& window, AssetManager& assetManager) 
-	: window(window), assetManager(assetManager), font(assetManager.getFont("Raleway.ttf")) 
-{
+MainMenu::MainMenu(sf::RenderWindow& window, AssetManager& assetManager, GameState& gameState)
+    : window(window), assetManager(assetManager), font(assetManager.getFont("Raleway.ttf")), gameState(gameState) {}
 
-
-}
 void MainMenu::handleEvents(const std::optional<sf::Event>& event) {
     for (auto& btn : menuButtons) {
         if (btn.isClicked(window, event)) {
-            if (btn.text.getString() == "Exit")
+            if (btn.getText() == "Exit")
                 window.close();
-            else
-                btn.shape.setFillColor(sf::Color::Magenta);
+            else if (btn.getText() == "Settings") {
+                gameState = GameState::SETTINGS_MENU;
+            }
+            else if (btn.getText() == "Missions") {
+                // do nothing as of yet
+            }
         }
     }
 }
@@ -20,6 +21,9 @@ MainMenu::~MainMenu() {
 	if (currentMusic.getStatus() == sf::Music::Status::Playing) {
 		currentMusic.stop();
 	}
+	assetManager.DeleteSoundBuffer("main_menu_theme.wav");
+	assetManager.DeleteTexture("main_menu_background.jpg");
+	menuButtons.clear();
 }
 
 void MainMenu::UpdateButtonLayout(sf::RectangleShape& overlay) {
@@ -30,26 +34,15 @@ void MainMenu::UpdateButtonLayout(sf::RectangleShape& overlay) {
     float buttonHeight = 60;
 
     for (size_t i = 0; i < menuButtons.size(); ++i) {
-        menuButtons[i].shape.setSize({ buttonWidth, buttonHeight });
-        menuButtons[i].shape.setPosition({ startX, startY + i * spacing });
-
-        // center text
-        sf::FloatRect textBounds = menuButtons[i].text.getLocalBounds();
-        menuButtons[i].text.setOrigin({
-            textBounds.position.x + textBounds.size.x / 2.f,
-            textBounds.position.y + textBounds.size.y / 2.f
-            });
-        menuButtons[i].text.setPosition({
-            menuButtons[i].shape.getPosition().x + buttonWidth / 2.f,
-            menuButtons[i].shape.getPosition().y + buttonHeight / 2.f
-            });
+        menuButtons[i].setSize({ buttonWidth, buttonHeight });
+        menuButtons[i].setPosition({ startX, startY + i * spacing });
     }
 }
 
 void MainMenu::InitializeMenuButtons(sf::RectangleShape& overlay) {
-    std::vector<std::string> labels = { "New Game", "Load Game", "Settings", "Exit" };
+    std::vector<std::string> labels = { "Missions", "Settings", "Exit" };
 
-    float startX = overlay.getGlobalBounds().position.x + ((overlay.getGlobalBounds().size.x * (1 / 4096)));
+    float startX = overlay.getGlobalBounds().position.x + ((overlay.getGlobalBounds().size.x * (static_cast<float>(1) / 4096)));
     float startY = overlay.getGlobalBounds().position.y + 200;
     float spacing = 80;          // space between buttons
     float buttonWidth = overlay.getGlobalBounds().size.x;
@@ -57,21 +50,10 @@ void MainMenu::InitializeMenuButtons(sf::RectangleShape& overlay) {
 
     for (size_t i = 0; i < labels.size(); ++i) {
         Button btn(font, labels[i]);
-        btn.shape.setSize({ buttonWidth, buttonHeight });
-        btn.shape.setFillColor(sf::Color(50, 50, 50, 200)); // semi-transparent
-        btn.shape.setPosition({ startX, startY + i * spacing });
+        btn.setSize({ buttonWidth, buttonHeight });
+        btn.setFillColor(sf::Color(50, 50, 50, 200)); // semi-transparent
+        btn.setPosition({ startX, startY + i * spacing });
 
-        btn.text.setFont(font);
-        btn.text.setString(labels[i]);
-        btn.text.setCharacterSize(36);
-        btn.text.setFillColor(sf::Color::White);
-
-        // center text inside button
-        sf::FloatRect textBounds = btn.text.getLocalBounds();
-        btn.text.setOrigin({ textBounds.position.x + textBounds.size.x / 2.f,
-                        textBounds.position.y + textBounds.size.y / 2.f });
-        btn.text.setPosition({ btn.shape.getPosition().x + buttonWidth / 2.0f,
-                            btn.shape.getPosition().y + buttonHeight / 2.0f });
         menuButtons.push_back(btn);
     }
 }
@@ -94,13 +76,9 @@ void MainMenu::DrawMainMenu() {
 
     // Initialize buttons once
     if (menuButtons.empty()) {
-        std::vector<std::string> labels = { "Missions", "Settings", "Exit" };
-        for (auto& label : labels) {
-            menuButtons.push_back(Button(font, label));
-        }
+		InitializeMenuButtons(overlay);
     }
 
-    // Update layout every frame (or on resize)
     UpdateButtonLayout(overlay);
 
     sf::Text title(font);
@@ -118,12 +96,7 @@ void MainMenu::DrawMainMenu() {
     }
 
     for (auto& btn : menuButtons) {
-        if (btn.clicked)
-            btn.shape.setFillColor({ 51, 158, 158, 200 });
-        else if (btn.isMouseOver(window))
-            btn.shape.setFillColor({ 100, 100, 100, 200 });
-        else
-            btn.shape.setFillColor({ 50, 50, 50, 200 });
+		
     }
 
     window.draw(backgroundSprite);
