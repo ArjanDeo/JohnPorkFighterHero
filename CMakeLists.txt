@@ -19,3 +19,4 @@ target_include_directories(JohnPorkFighterHero PRIVATE
 )
 
 target_link_libraries(JohnPorkFighterHero PRIVATE SFML::Window SFML::Graphics SFML::Audio)
+

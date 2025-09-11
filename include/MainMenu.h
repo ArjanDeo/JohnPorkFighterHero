@@ -11,7 +11,6 @@
 #include "GameState.h"
 #include "AssetManager.h"
 
-
 class MainMenu {
 public:
 	MainMenu(sf::RenderWindow& window, AssetManager& assetManager, GameState& gameState);

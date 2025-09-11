@@ -21,7 +21,7 @@ MainMenu::~MainMenu() {
 	if (currentMusic.getStatus() == sf::Music::Status::Playing) {
 		currentMusic.stop();
 	}
-	assetManager.DeleteSoundBuffer("main_menu_theme.wav");
+	assetManager.DeleteSoundBuffer("main_menu_theme.ogg");
 	assetManager.DeleteTexture("main_menu_background.jpg");
 	menuButtons.clear();
 }
@@ -92,7 +92,7 @@ void MainMenu::DrawMainMenu() {
 
     sf::SoundSource::Status musicStatus = currentMusic.getStatus();
     if (musicStatus != sf::SoundSource::Status::Playing) {
-        common.PlayMusic(currentMusic, "assets/sound/main_menu_theme.wav", true);
+        common.PlayMusic(currentMusic, "assets/sound/main_menu_theme.ogg", true);
     }
 
     for (auto& btn : menuButtons) {

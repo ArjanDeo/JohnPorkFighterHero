@@ -3,6 +3,7 @@
 #include "GameState.h"
 #include "AssetManager.h"
 #include "Button.h"
+
 class SettingsMenu {
 public:
 	SettingsMenu(sf::RenderWindow& window, AssetManager& assetManager, GameState& gameState);
