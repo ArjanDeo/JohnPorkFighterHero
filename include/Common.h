@@ -6,4 +6,7 @@ class Common {
 public:
     static sf::Vector2f ScaleVector(sf::Vector2u child, sf::Vector2u parent);
     void PlayMusic(sf::Music& currentMusic, std::string sourceFile, bool looping);
+    void ToggleFullscreen(sf::RenderWindow& window);
+private:
+    static inline bool isFullscreen = false;
 };

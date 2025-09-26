@@ -6,8 +6,10 @@
 #include <string>
 #include <map>
 #include <iostream>
+#include <TGUI/Backend/SFML-Graphics.hpp>
+#include <TGUI/TGUI.hpp>
 #include "Common.h"
-#include "Button.h"
+#include "UI/Button.h"
 #include "GameState.h"
 #include "AssetManager.h"
 

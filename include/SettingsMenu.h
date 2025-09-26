@@ -2,7 +2,7 @@
 #include <SFML/Graphics.hpp>
 #include "GameState.h"
 #include "AssetManager.h"
-#include "Button.h"
+#include "Ui/Button.h"
 
 class SettingsMenu {
 public:

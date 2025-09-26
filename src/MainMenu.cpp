@@ -1,20 +1,13 @@
 #include "Common.h"
 #include "MainMenu.h"
+#include <TGUI/TGUI.hpp>
+#include "UI/Button.h"
 MainMenu::MainMenu(sf::RenderWindow& window, AssetManager& assetManager, GameState& gameState)
     : window(window), assetManager(assetManager), font(assetManager.getFont("Raleway.ttf")), gameState(gameState) {}
 
 void MainMenu::handleEvents(const std::optional<sf::Event>& event) {
     for (auto& btn : menuButtons) {
-        if (btn.isClicked(window, event)) {
-            if (btn.getText() == "Exit")
-                window.close();
-            else if (btn.getText() == "Settings") {
-                gameState = GameState::SETTINGS_MENU;
-            }
-            else if (btn.getText() == "Missions") {
-                // do nothing as of yet
-            }
-        }
+        btn.handleEvent(event);
     }
 }
 MainMenu::~MainMenu() {
@@ -40,22 +33,18 @@ void MainMenu::UpdateButtonLayout(sf::RectangleShape& overlay) {
 }
 
 void MainMenu::InitializeMenuButtons(sf::RectangleShape& overlay) {
-    std::vector<std::string> labels = { "Missions", "Settings", "Exit" };
+    Button missionButton(font, "Missions", 32);
+    missionButton.setOnClick([this]() { gameState = GameState::MISSION_MENU; });
 
-    float startX = overlay.getGlobalBounds().position.x + ((overlay.getGlobalBounds().size.x * (static_cast<float>(1) / 4096)));
-    float startY = overlay.getGlobalBounds().position.y + 200;
-    float spacing = 80;          // space between buttons
-    float buttonWidth = overlay.getGlobalBounds().size.x;
-    float buttonHeight = 60;
+    Button settingsButton(font, "Settings", 32);
+    settingsButton.setOnClick([this]() { gameState = GameState::SETTINGS_MENU; });
 
-    for (size_t i = 0; i < labels.size(); ++i) {
-        Button btn(font, labels[i]);
-        btn.setSize({ buttonWidth, buttonHeight });
-        btn.setFillColor(sf::Color(50, 50, 50, 200)); // semi-transparent
-        btn.setPosition({ startX, startY + i * spacing });
+    Button exitButton(font, "Exit", 32);
+    exitButton.setOnClick([this]() { window.close(); });
 
-        menuButtons.push_back(btn);
-    }
+    menuButtons.push_back(missionButton);
+    menuButtons.push_back(settingsButton);
+    menuButtons.push_back(exitButton);
 }
 
 void MainMenu::DrawMainMenu() {
@@ -74,10 +63,10 @@ void MainMenu::DrawMainMenu() {
 
     overlay.setSize({ winSize.x * 0.2f, static_cast<float>(winSize.y) });
 
-    // Initialize buttons once
     if (menuButtons.empty()) {
 		InitializeMenuButtons(overlay);
     }
+    
 
     UpdateButtonLayout(overlay);
 
@@ -95,12 +84,11 @@ void MainMenu::DrawMainMenu() {
         common.PlayMusic(currentMusic, "assets/sound/main_menu_theme.ogg", true);
     }
 
-    for (auto& btn : menuButtons) {
-		
-    }
 
     window.draw(backgroundSprite);
     window.draw(overlay);
     window.draw(title);
-    for (auto& btn : menuButtons) btn.draw(window);
+    for (auto& btn : menuButtons) {
+        btn.draw(window);
+	}
 }

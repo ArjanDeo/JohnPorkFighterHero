@@ -2,11 +2,10 @@
 #include <SFML/Window.hpp>
 #include <SFML/Graphics.hpp>
 #include "AssetManager.h"
-#include "Button.h"
+#include "UI/Button.h"
 #include "GameState.h"
 #include "MainMenu.h"
 #include "SettingsMenu.h"
-
 
 static sf::Image GameIcon(AssetManager &assetManager) {
     sf::Texture &iconTexture = assetManager.getTexture("gameIcon.png");
@@ -17,12 +16,14 @@ static sf::Image GameIcon(AssetManager &assetManager) {
 }
 
 static sf::RenderWindow GameWindow(AssetManager& assetManager) {
+    const sf::Vector2u MIN_SIZE(1200, 720);
     sf::RenderWindow window;
     sf::VideoMode desktop = sf::VideoMode::getDesktopMode();
     sf::Image gameIcon = GameIcon(assetManager);
 
     window.create(desktop, "John Pork: Fighter Hero");
-    window.setIcon(gameIcon.getSize(), gameIcon.getPixelsPtr());
+    window.setIcon(gameIcon);
+    window.setMinimumSize(MIN_SIZE);
     return window;
 }
 
@@ -35,14 +36,17 @@ int main() {
 	gameState = GameState::MAIN_MENU;
 
     sf::RenderWindow window = GameWindow(assetManager);
-    const sf::Vector2u MIN_SIZE(1200, 720);
-	window.setMinimumSize(MIN_SIZE);
+
     MainMenu mainMenu(window, assetManager, gameState);
     SettingsMenu settingsMenu(window, assetManager, gameState);
+
+
+
     while (window.isOpen())
     {
         while (const std::optional event = window.pollEvent())
         {
+
             if (event->is<sf::Event::Closed>())
                 window.close();
 
@@ -73,7 +77,7 @@ int main() {
         default:
             break;
         }
-        
+
         window.display();
     }
     return 0;
