@@ -1,14 +1,15 @@
 #pragma once
 #include <SFML/Graphics.hpp>
+#include "Window/BaseWindow.h"
 #include "GameState.h"
 #include "AssetManager.h"
 #include "Ui/Button.h"
 
-class SettingsMenu {
+class SettingsMenu : public BaseWindow {
 public:
 	SettingsMenu(sf::RenderWindow& window, AssetManager& assetManager, GameState& gameState);
-	void DrawSettingsMenu();
-	void handleEvents(const std::optional<sf::Event>& event);
+	void drawWindow() override;
+	void handleEvent(const std::optional<sf::Event>& event) override;
 private:
 	GameState& gameState;
 	sf::RenderWindow& window;
@@ -20,4 +21,5 @@ private:
 	sf::Vector2u windowSize;
 
 	void InitializeButtons();
+	void updateElementLayout() override;
 };

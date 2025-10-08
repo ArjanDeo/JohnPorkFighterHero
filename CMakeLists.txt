@@ -8,7 +8,7 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 find_package(SFML CONFIG REQUIRED COMPONENTS Graphics Window System Audio)
 find_package(TGUI CONFIG REQUIRED)
 
-add_executable(JohnPorkFighterHero src/Main.cpp src/AssetManager.cpp   "include/MainMenu.h"  "include/MainMenu.h" "src/MainMenu.cpp" "include/Common.h" "src/Common.cpp" "include/SettingsMenu.h" "src/SettingsMenu.cpp" "include/UIElement.h" "src/UI/Button.cpp" "include/UI/Button.h")
+add_executable(JohnPorkFighterHero src/Main.cpp src/AssetManager.cpp   "include/MainMenu.h"  "include/MainMenu.h" "src/MainMenu.cpp" "include/Common.h" "src/Common.cpp" "include/SettingsMenu.h" "src/SettingsMenu.cpp" "include/UIElement.h" "src/UI/Button.cpp" "include/UI/Button.h" "include/MissionMenu.h" "include/MissionSelection.h"  "src/Missions/MissionManager.cpp" "include/Missions/MissionManager.h" "include/Window/BaseWindow.h" "src/Missions/MissionMenu.cpp" "include/UI/MissionCard.h" "src/UI/MissionCard.cpp" "include/StackManager.h")
 
 add_custom_command(TARGET JohnPorkFighterHero POST_BUILD
     COMMAND ${CMAKE_COMMAND} -E copy_directory
@@ -19,5 +19,5 @@ target_include_directories(JohnPorkFighterHero PRIVATE
     ${CMAKE_CURRENT_SOURCE_DIR}/include
 )
 
-target_link_libraries(JohnPorkFighterHero PRIVATE SFML::Window SFML::Graphics SFML::Audio TGUI::TGUI)
+target_link_libraries(JohnPorkFighterHero PRIVATE SFML::Window SFML::Graphics SFML::Audio)
 

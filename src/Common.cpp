@@ -16,6 +16,7 @@ void Common::PlayMusic(sf::Music &currentMusic,std::string sourceFile, bool loop
     }
 
     currentMusic.setLooping(looping);
+	currentMusic.setVolume(50); // Set volume to 50%
     currentMusic.play();
 }
 void Common::ToggleFullscreen(sf::RenderWindow& window) {

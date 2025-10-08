@@ -8,17 +8,18 @@
 #include <iostream>
 #include <TGUI/Backend/SFML-Graphics.hpp>
 #include <TGUI/TGUI.hpp>
+#include "Window/BaseWindow.h"
 #include "Common.h"
 #include "UI/Button.h"
 #include "GameState.h"
 #include "AssetManager.h"
 
-class MainMenu {
+class MainMenu : public BaseWindow {
 public:
 	MainMenu(sf::RenderWindow& window, AssetManager& assetManager, GameState& gameState);
 	~MainMenu();
-	void DrawMainMenu();
-	void handleEvents(const std::optional<sf::Event>& event);
+	void drawWindow() override;
+	void handleEvent(const std::optional<sf::Event>& event) override;
 
 private:
 	Common common;
@@ -29,6 +30,6 @@ private:
 	sf::RectangleShape overlay;
 	std::vector<Button> menuButtons;
 	sf::Music currentMusic;
-	void UpdateButtonLayout(sf::RectangleShape& overlay);
+	void updateElementLayout() override;
 	void InitializeMenuButtons(sf::RectangleShape& overlay);
 };

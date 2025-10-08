@@ -3,9 +3,10 @@
 #include <TGUI/TGUI.hpp>
 #include "UI/Button.h"
 MainMenu::MainMenu(sf::RenderWindow& window, AssetManager& assetManager, GameState& gameState)
-    : window(window), assetManager(assetManager), font(assetManager.getFont("Raleway.ttf")), gameState(gameState) {}
+    : window(window), assetManager(assetManager), font(assetManager.getFont("Raleway.ttf")), gameState(gameState), BaseWindow(window, assetManager, gameState) 
+{}
 
-void MainMenu::handleEvents(const std::optional<sf::Event>& event) {
+void MainMenu::handleEvent(const std::optional<sf::Event>& event) {
     for (auto& btn : menuButtons) {
         btn.handleEvent(event);
     }
@@ -19,7 +20,7 @@ MainMenu::~MainMenu() {
 	menuButtons.clear();
 }
 
-void MainMenu::UpdateButtonLayout(sf::RectangleShape& overlay) {
+void MainMenu::updateElementLayout() {
     float startX = overlay.getPosition().x + ((overlay.getSize().x * (1 / 4096.f)));
     float startY = overlay.getPosition().y + 200;
     float spacing = 80;
@@ -47,14 +48,13 @@ void MainMenu::InitializeMenuButtons(sf::RectangleShape& overlay) {
     menuButtons.push_back(exitButton);
 }
 
-void MainMenu::DrawMainMenu() {
+void MainMenu::drawWindow() {
     sf::Vector2u winSize = window.getSize();
     sf::Texture& backgroundTexture = assetManager.getTexture("main_menu_background.jpg");
     sf::Sprite backgroundSprite(backgroundTexture);
 
     backgroundSprite.setScale(common.ScaleVector(backgroundTexture.getSize(), winSize));
 
-    sf::RectangleShape overlay;
 
     sf::Color overlayColor(0, 0, 0, 200);
     overlay.setFillColor(overlayColor);
@@ -68,7 +68,7 @@ void MainMenu::DrawMainMenu() {
     }
     
 
-    UpdateButtonLayout(overlay);
+    updateElementLayout();
 
     sf::Text title(font);
 
@@ -91,4 +91,5 @@ void MainMenu::DrawMainMenu() {
     for (auto& btn : menuButtons) {
         btn.draw(window);
 	}
+
 }

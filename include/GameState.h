@@ -1,9 +1,9 @@
 #pragma once
 
 enum class GameState {
-    MAIN_MENU,
+	MAIN_MENU,
 	SETTINGS_MENU,
-    PAUSE_MENU,
-    MISSION_MENU,
-    MISSION
+	PAUSE_MENU,
+	MISSION_MENU,
+	MISSION
 };
